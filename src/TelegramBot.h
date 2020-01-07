@@ -1,8 +1,8 @@
-// Copyright Casa Jasmina 2016
+// Copyright 
 // LGPL License
 //
 // TelegramBot library
-// https://github.com/CasaJasmina/TelegramBot-Library
+// https://github.com/
 
 #ifndef TelegramBot_h
 #define TelegramBot_h
@@ -11,7 +11,8 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <Client.h>
-#include <TelegramKeyboard.h>
+#include <WiFiClientSecure.h>
+//#include <TelegramKeyboard.h>
 
 #define HOST "api.telegram.org"
 #define SSL_PORT 443
@@ -24,51 +25,56 @@
 #endif
 #endif
 
-struct message{
-  String text;
-  String chat_id;
-  String sender;
-  String date;
+class TelegramChat {
+	public:
+		TelegramChat(long long id);
+		TelegramChat(JsonObject chatObjectJson);
+		~TelegramChat();	
+		long long id();
+		const char* type();
+	private:
+		void type(const char* t);
+		
+		char* _type = NULL;
+		long long _id = 0;
 };
 
 class TelegramMessage {
 	public:
 		TelegramMessage();
-		TelegramMessage(long long chatId, char *text);
 		~TelegramMessage();
-		int type(void);
-		void type(int type);
-		long long chatId();
-		void chatId(long long chatId);
-		char* text();
+		TelegramChat& chat();
+		void chat(TelegramChat* chat);
+		const char* text();
 		void text(const char* text);
+		int type();
+		void type(int type);
 		static const int isNull = 0;
-		static const int isChatMessage = 1;
-		static const int isChannelMessage = 2;
+		static const int isMessage = 1;
+		static const int isEditedMessage = 2;
+		static const int isChannelPost = 3;
+		static const int isEditedChannelPost = 4;
 	protected:
-		long long _chatId;
-		char* _text;
-		int _type;
+		TelegramChat* _chat = NULL;
+		char* _text = NULL;
+		int _type = isNull;
 };
 
 class TelegramBot
 {
   public:
-    TelegramBot(const char* token, Client &client);
-  	void begin();
-    String sendMessage(String chat_id, String text);
-    String sendMessage(String chat_id, String text, TelegramKeyboard &keyboard_markup, bool one_time_keyboard = true, bool resize_keyboard = true);
-    String postMessage(String msg);
+    TelegramBot(const char* token);
+	~TelegramBot();
+	void sendMessage(long long id, const char* txt);
 	void postMessage(const char* msg);
-    message getUpdates();
-	bool getUpdate(TelegramMessage & m);
+	long long getUpdate(TelegramMessage & m);
 	void sendMessage(TelegramMessage & tm);
   private:
+      bool connect();
       String readPayload();
-      const char* token;
-      int last_message_recived;
-
-      Client *client;
+      char* _token;
+      int _probeUpdateId;
+      WiFiClientSecure *_client;
 };
 
 #endif
