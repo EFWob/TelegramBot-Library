@@ -66,12 +66,16 @@ class TelegramBot
     TelegramBot(const char* token);
 	~TelegramBot();
 	void sendMessage(long long id, const char* txt);
+	void postMessage(const char* apiCall, JsonDocument & doc);
 	void postMessage(const char* msg);
 	long long getUpdate(TelegramMessage & m);
 	void sendMessage(TelegramMessage & tm);
+	int nativeApiCall(const char* apiCall, JsonDocument & msg);
   private:
       bool connect();
       String readPayload();
+	  int readHttpResponse();
+	  int readHttpResponse(JsonDocument & msg);
       char* _token;
       int _probeUpdateId;
       WiFiClientSecure *_client;
